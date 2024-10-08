@@ -22,8 +22,5 @@ class RNN(nn.Module):
         # Return output and hidden state
         return output, hidden
     
-    def initHidden(self):
-        return torch.zeros(1, self.hidden_size)
-    
-        
-    
+    def initHidden(self, batch_size):
+        return torch.zeros(batch_size, self.hidden_size)
