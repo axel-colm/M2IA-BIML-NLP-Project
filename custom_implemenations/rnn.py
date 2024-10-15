@@ -9,10 +9,12 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-class RNN(nn.Module):
+class CustomRNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
-        super(RNN, self).__init__()
+        super(CustomRNN, self).__init__()
         self.hidden_size = hidden_size
+        self.input_size = input_size
+        self.output_size = output_size
         
         self.i2h = nn.Linear(input_size + hidden_size, hidden_size)
         self.i2o = nn.Linear(input_size + hidden_size, output_size)
@@ -28,8 +30,11 @@ class RNN(nn.Module):
     def initHidden(self, batch_size):
         return Variable(torch.zeros(batch_size, self.hidden_size))
 
-    def fit(self, train_loader, val_loader, epochs, lr, loss_func=nn.NLLLoss()):
+    def fit(self, train_loader, val_loader, epochs, lr, loss_func=nn.NLLLoss(), patience=3):
         optimizer = torch.optim.Adam(self.parameters(), lr=lr)
+
+        previous_loss = float('-inf')
+        epochs_with_no_improvement = 0
         
         history = {
             'epoch': [],
@@ -82,15 +87,23 @@ class RNN(nn.Module):
             print(f"Epoch {epoch+1}/{epochs}, "
                   f"Train Loss: {avg_train_loss:.4f}, Train Acc: {avg_train_acc:.4f}, "
                   f"Val Loss: {avg_val_loss:.4f}, Val Acc: {avg_val_acc:.4f}")
+            
+            if previous_loss <= avg_val_loss:
+                epochs_with_no_improvement += 1
+            else:
+                epochs_with_no_improvement = 0
+
+            previous_loss = avg_val_loss
+
+            if epochs_with_no_improvement == patience:
+                break
         
         return history
 
     def evaluate(self, test_loader, loss_func=nn.NLLLoss()):
         correct = []
-        actual_labels = []
-        
+        actual_labels = [] 
         self.eval()
-        
         with torch.no_grad():
             total_loss = 0
             for x, t in test_loader:
@@ -109,20 +122,23 @@ class RNN(nn.Module):
 
 
     def save(self, path):
-        RNN.save_model(self, path)
+        CustomRNN.save_model(self, path)
+
+    def load(self, path):
+        CustomRNN.load(path, self.input_size, self.hidden_size, self.output_size)
         
     @staticmethod
-    def save_model(model: 'RNN', path):
+    def save_model(model: 'CustomRNN', path):
         path = os.path.join('models', path)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         torch.save(model.state_dict(), path)
     
     @staticmethod
-    def load(path, input_size, hidden_size, output_size) -> 'RNN':
+    def load(path, input_size, hidden_size, output_size) -> 'CustomRNN':
         if not os.path.exists(path):
             path = os.path.join('models', path)
             if not os.path.exists(path):
                 raise FileNotFoundError(f"Model file not found at {path}")
-        model = RNN(input_size, hidden_size, output_size)
+        model = CustomRNN(input_size, hidden_size, output_size)
         model.load_state_dict(torch.load(path))
         return model
