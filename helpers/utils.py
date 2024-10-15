@@ -7,7 +7,8 @@ from typing import List, Tuple, Union, Iterable
 from torch import LongTensor, Tensor
 from torchtext.vocab import Vocab
 from torch.utils.data import DataLoader, Dataset
-from scipy.sparse._csr import csr_matrix
+
+# https://drive.google.com/drive/folders/1nzNHcOKvurv2dDtljEJ8f58ZPTO8VaC7
 
 def load_file(file_path: str) -> Tuple[List[str], List[str]]:
     texts = []
@@ -67,7 +68,7 @@ def collate_fn(batch: List[Tuple[str, NDArray]], vocab: Vocab, max_length: int =
     return one_hot_batch, labels_batch
 
 
-def create_loader(sentences: List[str], labels: NDArray,vocab: Vocab, batch_size: int, shuffle=False, max_length=64) -> DataLoader:
+def create_loader(sentences: List[str], labels: NDArray,vocab: Vocab, batch_size: int, device, shuffle=False, max_length=64) -> DataLoader:
     dataset = TextDataset(sentences, labels)
     loader = DataLoader(
         dataset, 
