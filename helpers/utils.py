@@ -33,7 +33,7 @@ def create_vocab(sentences: List[str]) -> Vocab:
     vocab.set_default_index(vocab['unk'])
     return vocab
 
-def get_one_hot(vocab: Vocab, keys: Union[str, Iterable], max_length=64) -> LongTensor:
+def get_one_hot(vocab: Vocab, keys: Union[str, Iterable], max_length=24) -> LongTensor:
     if isinstance(keys, str):
         keys = [keys]
 
@@ -60,15 +60,15 @@ class TextDataset(Dataset):
     def __getitem__(self, idx):
         return self.texts[idx], self.labels[idx]
 
-def collate_fn(batch: List[Tuple[str, NDArray]], vocab: Vocab, max_length: int = 64) -> Tuple[Tensor, Tensor]:
+def collate_fn(batch: List[Tuple[str, NDArray]], vocab: Vocab, max_length: int = 24) -> Tuple[Tensor, Tensor]:
     texts, labels = zip(*batch)
     one_hot_batch = torch.stack([get_one_hot(vocab, text.split(), max_length) for text in texts]).to(torch.float32)
-    one_hot_batch = one_hot_batch.transpose(0, 1)
+    one_hot_batch = one_hot_batch.permute(dims=(1,0,2))
     labels_batch = torch.from_numpy(np.array(labels)).to(torch.long)
     return one_hot_batch, labels_batch
 
 
-def create_loader(sentences: List[str], labels: NDArray,vocab: Vocab, batch_size: int, device, shuffle=False, max_length=64) -> DataLoader:
+def create_loader(sentences: List[str], labels: NDArray,vocab: Vocab, batch_size: int, shuffle=False, max_length=24) -> DataLoader:
     dataset = TextDataset(sentences, labels)
     loader = DataLoader(
         dataset, 
@@ -77,3 +77,8 @@ def create_loader(sentences: List[str], labels: NDArray,vocab: Vocab, batch_size
         collate_fn=lambda batch: collate_fn(batch, vocab, max_length)
     )
     return loader
+
+def calculate_mean_length(texts):
+    total_length = sum(len(sentence.split()) for sentence in texts)
+    mean_length = total_length / len(texts) if texts else 0
+    return mean_length
