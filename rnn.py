@@ -5,6 +5,9 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from sklearn.metrics import ConfusionMatrixDisplay, classification_report, accuracy_score
 import matplotlib.pyplot as plt
+import warnings
+
+warnings.filterwarnings('ignore')
 
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -25,8 +28,7 @@ class RNN(nn.Module):
     def initHidden(self, batch_size):
         return Variable(torch.zeros(batch_size, self.hidden_size))
 
-    def fit(self, train_loader, val_loader, epochs, lr):
-        loss_func = nn.NLLLoss()
+    def fit(self, train_loader, val_loader, epochs, lr, loss_func=nn.NLLLoss()):
         optimizer = torch.optim.Adam(self.parameters(), lr=lr)
         
         history = {
@@ -83,8 +85,7 @@ class RNN(nn.Module):
         
         return history
 
-    def evaluate(self, test_loader):
-        loss_func = nn.NLLLoss()
+    def evaluate(self, test_loader, loss_func=nn.NLLLoss()):
         correct = []
         actual_labels = []
         

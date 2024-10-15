@@ -1,4 +1,3 @@
-import torch.backends
 from helpers.utils import load_file, create_vocab, create_loader, calculate_mean_length
 import math
 import numpy as np
@@ -6,8 +5,6 @@ from sklearn.preprocessing import LabelEncoder
 from rnn import RNN
 
 if __name__ == "__main__":
-
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
 
     train_texts, train_emotions = load_file('dataset/train.txt')
     val_texts, val_emotions = load_file('dataset/val.txt')
@@ -35,6 +32,6 @@ if __name__ == "__main__":
 
     # Initialsize model
     rnn = RNN(len(vocab),128,len(np.unique(train_emotions)))
-    # history = rnn.fit(train_loader, val_loader, 10, lr=0.001)
+    history = rnn.fit(train_loader, val_loader, 10, lr=0.001)
     rnn.evaluate(test_loader)
 
