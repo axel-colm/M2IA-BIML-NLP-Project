@@ -71,7 +71,7 @@ class LSTM(nn.Module):
             acc, val_loss = self.evaluate(val_loader)
             print(f"Epoch {epoch+1}/{epochs} - Loss: {avg_loss:.4f} - Val Loss: {val_loss:.4f} - Val Acc: {acc:.4f}")
 
-    def evaluate(self, test_loader):
+    def evaluate(self, test_loader
         loss_func = nn.CrossEntropyLoss()
         
         total_loss = 0.0
