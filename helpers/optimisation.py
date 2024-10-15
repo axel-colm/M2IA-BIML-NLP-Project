@@ -1,8 +1,5 @@
 import nltk
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from nltk.stem import WordNetLemmatizer
-from sklearn.feature_extraction.text import TfidfVectorizer
 import re
 import string
 from torch import nn
@@ -15,7 +12,6 @@ nltk.download('stopwords')
 nltk.download('wordnet')
 
 def get_word_distribution(all_texts):
-    tfidf_vectorizer = TfidfVectorizer()
     all_texts = " ".join(text for text in all_texts)
     tokens = [word for word in all_texts.split()]
     freq_dist = nltk.FreqDist(tokens)
